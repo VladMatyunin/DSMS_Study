@@ -36,8 +36,8 @@ def add_word(document_id, word):
     bad_word_select = db.query("SELECT word FROM break_words WHERE word='"+word+"'")
     if len(bad_word_select) != 0:
         return
-    document = db.prepare("SELECT document_id,count FROM words WHERE word=$1")
-    document = document(word)
+    document = db.prepare("SELECT document_id,count FROM words WHERE word=$1 AND document_id=$2")
+    document = document(word, document_id)
     if len(document) == 0:
         insert = db.prepare("INSERT INTO words(word, document_id,count) VALUES ($1, $2, $3)")
         insert(word, document_id, 1)
