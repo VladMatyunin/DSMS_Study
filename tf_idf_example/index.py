@@ -2,7 +2,7 @@ import re
 
 import postgresql
 
-db = postgresql.open('pq://postgres:sa@localhost:5432/tfidf')
+db = postgresql.open('pq://postgres:sa@localhost:5432/tf_idf')
 
 DOCUMENT1 = "document1.txt"
 DOCUMENT2 = "document2.txt"
