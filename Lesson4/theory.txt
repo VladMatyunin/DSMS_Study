@@ -1,0 +1,60 @@
+Joins
+Equi-Joins (inner join)
+self joins
+cartesian products (cross join)
+...
+Lateral Join (Postgres only)
+
+Inner Join
+2 tables
+Includes only rows existing in both tables
+
+Cross Join
+Multiplication (1 table with each row of another)
+
+Natural Join
+(name of column must be the same), no doubling of columns
+
+Left Join
+All from left with right values
+
+Right Join
+the same as left, accepts right table
+
+Full Join
+All from both tables with On aggregation column
+
+Anti Join
+Not In, Not exists
+With Not Exists with limit 1 at the end works faster
+
+Semi Join
+Exists(Select 1...), requires true
+In
+
+Lateral Join
+Cross join lateral
+
+Self Join
+
+With recursive _t1 as
+(
+    Select
+        num,
+        name,
+        1 as level
+    From t1
+    Where par_id is null
+    Union
+    Select
+        t_2.num,
+        t_2.name,
+        t1.level + 1 as level
+    From t1 t_2 inner join _t1 on (_t1.num = y_2.par_id)
+)
+Select num emp_no,
+       name emp_name,
+       par_id mgr_no,
+       level
+From _t1
+Order by num;
