@@ -1,0 +1,97 @@
+Transactional Isolation Levels
+
+Serializable       +            +               +               +
+Repeatable read    -            +               +               +
+read committed     -            -               +               +
+Read uncommitted   -            -               -               +
+NULL               -            -               -               -
+                Phantom    Non-Rep. Read    Dirty Read      Lost Update
+                read
+
+Transactional Isolation Levels VS Locks
+
+   Isolation            Read Lock       Write Lock
+   Level
+
+   Read
+   Uncommitted             -                -
+
+   Read
+   Committed               S                -
+
+   Repeatable
+   Read                    X                -
+
+   Serializable            X                X
+
+
+   POSTGRES ISOLATION LEVELS
+
+Begin Transaction Isolation level level_name option;
+
+level_name =[Serializable....], Default Read committed
+
+option=[Read Write|Read Only]
+
+Begin Transaction Isolation Level Serializable read only;
+....
+Commit;
+
+*If ddl query=>all queries are committed automatically
+
+
+SAVEPOINT option
+Begin;
+Update .....
+Savepoint my_savepoint;
+Update ....
+Rollback to my_savepoint;
+Update......
+Commit;
+
+
+AUTONOMOUS Transaction (Oracle only)
+
+Pragma AUTONOMOUS_TRANSACTION
+Begin
+....
+
+Made to cope with exceptions, when transaction rolls back.
+Helps to create logs (because the whole transaction will be canceled)
+
+_____________________________________________________________________________
+
+                    RDBMS Objects:
+                        Query
+                    (OLAP beginning)
+
+Star Schema
+
+1 root table with children
+
+ROLLUP (...,...) ~ Grouping sets
+NULLS LAST
+
+----
+Group by Cube (provider, product)
+Oracle only
+Grouping
+Grouping_id
+Group_id
+
+------------
+Map -> Select
+Reduce -> Group By, Order By
+------------
+Get most counted words in each documents
+using grouping set
++ *Having count more than 1
+
+
+Shingling
+*Document is string of characters
+*Define k-shingle is any substring of length k
+*Document associates with set of k-shingles
+
+D='abcdabd', if k=2 then
+2-shingle
