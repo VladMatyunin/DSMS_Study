@@ -1,0 +1,90 @@
+Execute immediate "Create table test(...);"
+-immediate means to execute statement without any retrieve result set
+
+v$sql - stores all queries (Oracle)
+
+Type of tables
+-Heap table
+-index-organized table (placed separately-best practice)
+-partitioning table
+-temporary table
+
+Temporary tables
+Physical tables, but values after session end are deleted
+
+Create temporary table [If not exists] temp_location
+{
+...
+}
+ On commit delete rows;
+ [On commit preserve rows - default,
+  on commit drop]
+
+Used in preprocessing
+
+In Oracle
+Create Global Temporary Table ...
+On Commit Delete Rows; -- TTL during transaction
+On commit preserve rows; -- TTL during session
+
+Truncate table vs delete
+delete does not reorganize file
+truncate works faster
+but from delete we can undo changes and restore deleted files
+
+
+==================================
+Index organized table
+Index B-tree table stores the whole data
+Works much faster + optimal disk usage
+
+Oracle:
+Create table (..
+..)
+Organization index tablespace ... including X ;
+if X exists, then X will be stored inside B-tree Node with PK
+
+Postgres: Not exists, but have similar one:
+
+CLUSTER [VERBOSE] table_name [USING index_name];
+Table will be ordered after this command, but during search b-tree and table are separated
+
+
+===================================
+Partitioning Table
+
+Oracle:
+3+2 types:
+-List partitioning - sort people by gender
+-Range partitioning - sort dates (months)
+-Hash partitioning - for good spread of data
+
+Composite:
+-Range+Hash
+-Range+List
+
+Create Table(
+...,
+Partition by range(sales_date))
+(
+Partition ... Values less than (...)
+Partition ... Values less than (...)
+)
+
+Create Table(
+...,
+Partition by list(sales_date))
+(
+Partition ... Values(...)
+Partition ... Values(...)
+)
+
+Create Table(
+...,
+Partition by hash(sales_date))
+
+Partitions 4
+Store in (..,..,..);
+
+create table users_1() inherits(users);
+create table users_1(like users including all) inherits(users);
