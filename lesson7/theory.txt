@@ -1,0 +1,146 @@
+Indexes
+Oracle and Postgres automatically creates Index if Primary key exists or unique constraint
+
+To create manually
+1. Foreign key constraint
+2. Based on a SQL with where, order by, OLAP etc
+
+OLAP (Dense_Rank(), Partition by col1) inside select
+
+Types of indexes
+
+PostgreSQL:
+-B-tree (one/multi columns)
+-Partial
+-Functional
+-gin/gist/brin/hash
+
+Oracle:
+-B-tree (one/multi columns)
+-Bitmap
+-Functional
+-Text index
+
+Bitmap - alternative to B-tree, applicable for small values (like colors)
+
+"GREEN" 0 0 0 1 1 0 0...
+"Blue"  1 1 0 0 0 1 0...
+"red"   0 0 1 0 0 0 1...
+
+
+
+Create Index name_of_index on table_name [TableSpace];
+Create unique index ... on ...
+Create index if not exists
+Create index concurrently ... on ..
+Create index ... on .. asc nulls last;
+Create index ... on .. desc nulls first;
+Drop index [concurrently] schema.index_name;
+
+tablespace needed for hardware optimization (e.g. store index in ssd, table in hdd)
+
+concurrently option:
+if not set, the table is blocked
+else creates a virtual one and set when no sessions exist, after that we can use it
+
+Oracle syntax
+create index ... on ... tablespace;
+create unique index .. on ...
+create bitmap index .. on ...
+
+everything works concurrently
+
+!!after creating index use analyze!!
+
+Explain analyze
+
+sequential scan
+read table by seq, use all values to search (like brootforce)
+
+Index scan
+search index, apply filter and use blocks
+
+Index only scan
+use not only index, but select values from table, needed by sql (avoid * search)
+
+Bitmap heap scan
+
+pg_stat_user_indexes     |
+pg_index                 | => where info about indexes is stored
+idx_scan if index is not used
+
+in Oracle:
+-dba_indexes (all_, user_)
+-dba_index_usage_info(all_, user_)
+dba - all from db, user_ from schema
+
+Functional indexes
+
+Create index _name_ on table_name (function(column)) tablespace ...;
+functions like upper, sin ...
+
+if use upper then:
+Select * from t where name='IVAN' => index does not work
+But:
+Select * from t where upper(name)='IVAN' => works
+
+In Oracle only:
+Varchar vs Varchar2
+Varchar - size is 100, then even if data size is 1, the whole memory used is 100
+in varchar2 will use only the memory it needs
+
+
+Partial indexes
+Create unique index ... on ... (subject, target) where success;
+index will be applied only for success values
+
+In Oracle:
+Create function ... Deterministic ...
+because in oracle no 'where' index
+
+        gin/gist/brin/hash index
+            Postgres only
+
+
+Generalized Inverted Index - for full text searches
+column must be 'tsvector' type
+
+tsvector for search tasks in string types
+
+Generalized Search Tree (GiST)
+column can be 'tsvector' or 'tsquery' type
+
+Block Range Index (BRIN)
+Very effective on huge sorted tables the size is really small then B-tree
+For example history or logs (date column)
+
+Hash index
+Can't restore after system crash and not using in replication
+Less functionality then B-three. Working with '='
+
+Planner Configuration Parameters
+Postgresql
+
+- random_page_cost = 1; -- indexes will be in use more aggressive
+- work_mem=4Mb; (default 128kb) will be in work_mem area
+- enable_bitmapscan = on; -- planner uses bitmap-scan plans
+- enable_hashagg = on; -- planner uses hashed aggregation plans
+...
+
+SQL Hints
+No in postgres, only pg_hint_plan extension
+
+SET seq_scan=OFF;
+
+ Seq Scan on test_index  (cost=0.00..1.62 rows=1 width=102) (actual time=0.018..0.030 rows=1 loops=1)
+   Filter: (id = 3)
+   Rows Removed by Filter: 49
+ Planning time: 0.105 ms
+ Execution time: 0.070 ms
+
+Index Scan using test_index_id on test_index  (cost=0.14..8.16 rows=1 width=102) (actual time=0.029..0.030 rows=1 loops=1)
+   Index Cond: (id = 3)
+ Planning time: 0.107 ms
+ Execution time: 0.057 ms
+(4 rows)
+
