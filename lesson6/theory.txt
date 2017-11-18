@@ -1,0 +1,123 @@
+Optimization
+
+Munin for postgresql
+pg_stat_statements plugin for sql optimization
+pgBadger - log analyzer (logs should be configured)
+Best practice - logs during day, at the end form a report
+pg_stat_activity - get all info about sessions, sql of each session
+
+Oracle
+v$session - analogue of pg_stat_activity
+
+Postgres conf
+max client connections - max connection for database
+
+Delete and update in postgres rows are not deleted simultaneously, they become hidden
+
+Postgres vacuum (postgres only)
+
+Vacuum [verbose] [table_name for 1 table]; - updated and deleted hidden rows are deleted
+Vacuum full - the same as previous, but table is locked
+Under the hood - the file is reorganized, new file is created
+Vacuum full reduces file size, while vacuum does not
+
+Best practice - use vacuum full when table is not used (find info from postgres)
+
+postgres auto-vacuum
+ aggressive autovacum - triggered
+ autovacum_* (params)
+ can split log transactions to disable lock on table to let autovacuum work
+
+
+Copy - fastest way to insert data in postgres
+autovacuum can be off (autovacuum(off)) to save memory
+
+
+___ANALYZE___
+ANALYZE[Verbose] [table_name] - get stats from table
+info about table in pg_statistic
+
+Cardinality for column or set of columns
+SELECT DISTINCT (col...) FROM A;
+
+Selectivity
+Distinct values / total number rows
+selectivity -> 0 means that a lot of same values
+if selectivity > 10% => create index on this table
+
+
+pg_stat_user_tables
+get vacuum info, last analyze
+in Oracle user_tables is the analogue
+
+pg_class.reltuples - get ~ num of rows (very fast) or in Oracle user_tables.num_rows
+
+Optimal Plan for sql execution
+oracle only
+Db Hints
+in Oracle and postgres
+DB loading, indexes, configuration, statistics
+
+Explain [Analyze][Verbose][Buffers][Costs] SQL
+How to see a plan for sql in postgresql
+
+Explain (analyze, verbose)
+Select * from ...
+
+Useful resource
+explain.dopesz.com to analyze explain info
+
+In Oracle
+1) Explain plan for SQL;
+2) Select * From Table(DBMS_XPLAN.DISPLAY);
+
+Steps to fix bottleneck SQL's
+
+ 1. Go to logs and get slow SQLs
+
+ (log_min_duration_statement - 500 in ms)
+ Postgres = pg_stat_statement +pgBadger
+ Oracle = Oracle Enterprise Management
+
+ 2. To explain and analyze
+ 3. Look on a plan
+
+How we can improve a plan on RDBMS level
+ 1. Indexes
+ 2. Oracle Hitns
+ 3. Prepared Statement or Bind SQL
+ 4. To avoid Dynamic SQL
+
+Oracle hits
+Select /* Hint query: Leading(e2 e1) USE_NL(e1) INDEX(e1 emp_emp_id_pk) */
+From....
+
+*if comment in query exists, it goes to logs
+
+Indexes B-tree
+if no index, then db selects whole table and iterate it
+if index, then using tree structure, it reads only its row directly
+
+leafs of tree are connected for restricted selects (select ... where id < 100)
+ reload conf to apply settings
+
+
+Postgres, Prepared Statement
+
+Prepare test(int, text,bool,bigint) as insert into table_test values($1,$2,$3,$4);
+Execute test (1,'test'...)
+
+Delete: Deallocate test;
+
+Phases:
+Prepare -> Parse -> Analyzr -> Rewritten -> Deallocate
+
+Execute -> Plan
+     |       |
+     |       v
+     |---> Execute
+
+     Dynamic SQL (Postgres)
+
+Execute Immediate 'sql query'
+-immediate means to execute statement without any retrieve result set

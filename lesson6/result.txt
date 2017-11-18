@@ -1,0 +1,7 @@
+step    result
+2         0bytes
+4         212 Mb
+6         381 Mb
+8         381 Mb
+10        381 Mb
+12        169 Mb
